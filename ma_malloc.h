@@ -31,5 +31,7 @@ void ma_free(void *ptr);
  */
 void ma_print(void);
 
+/*void checkStatus(void *ptr);*/
+
 
 #endif //MA_MALLOC_H_ 
