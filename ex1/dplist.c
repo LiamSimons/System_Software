@@ -58,9 +58,34 @@ dplist_t *dpl_create() {
 }
 
 void dpl_free(dplist_t **list) {
-
-    //TODO: add your code here
-
+	if(list == NULL){
+		return;
+	}
+	else if(*list == NULL){
+		free(*list);
+		return;
+	}
+	else if((*list)->head == NULL){
+		free(*list);
+		*list = NULL;
+		return;
+	}
+	else{
+		dplist_t *temp = *list;
+		dplist_node_t *node = temp->head;
+		//if((*list)->head != NULL){
+			while(node){
+				dplist_node_t *temp = node->next;
+				free(node);
+				node = temp;
+			}
+		//}
+		free(*list);
+		//free(temp);
+		*list = NULL;
+		//free(node);
+	}
+	return;
 }
 
 /* Important note: to implement any list manipulation operator (insert, append, delete, sort, ...), always be aware of the following cases:
@@ -112,15 +137,46 @@ dplist_t *dpl_insert_at_index(dplist_t *list, element_t element, int index) {
 }
 
 dplist_t *dpl_remove_at_index(dplist_t *list, int index) {
-
-    //TODO: add your code here
+	if(list != NULL){
+		dplist_node_t *node = dpl_get_reference_at_index(list, index);
+		if(index <= 0){
+			//dplist_t *list = node->prev;
+			list->head = node->next;
+		}
+		else if(index >= dpl_size(list)){
+			dplist_node_t *prev = node->prev;
+			prev->next = NULL;
+		}
+		else{
+			dplist_node_t *prev = node->prev;
+			dplist_node_t *next = node->next;
+			prev->next = node->next;
+			next->prev = node->prev;
+		}
+		free(node);
+	    //TODO: add your code here
+	    return list;
+	}
+	else{
+		return NULL;
+	}
 
 }
 
 int dpl_size(dplist_t *list) {
-
+	int size = 0;
+	if(list == NULL){
+		return -1;
+	}
+	else{
+		dplist_node_t *node = list->head;
+		while(node){
+			node = node->next;
+			size++;
+		}
+		return size;
+	}
     //TODO: add your code here
-    return -1;
 }
 
 dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
@@ -135,15 +191,49 @@ dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
 }
 
 element_t dpl_get_element_at_index(dplist_t *list, int index) {
-
+	if(list != NULL){
+		return dpl_get_reference_at_index(list, index)->element;
+	}
+	else{
+		return 0;
+	}
     //TODO: add your code here
 
 }
 
 int dpl_get_index_of_element(dplist_t *list, element_t element) {
+	if(list == NULL){
+		return -1;
+	}
+	else{
+		if(dpl_size(list) == 0){
+			return -1;
+		}
+		else{
+			dplist_node_t *node = list->head;
+			int index = 0;
+			while(node)
+			{
+				if(element == node->element){
+					return index;
+				}
+				else{
+					index++;
+					node = node->next;
+				}
+			}
+			return -1;
+		}
+	}
+}
 
-    //TODO: add your code here
-
+int dpl_check_head(dplist_t *list){
+	if(list->head == NULL){
+		return 0;
+	}
+	else{
+		return 1;
+	}
 }
 
 

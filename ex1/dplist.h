@@ -96,4 +96,6 @@ element_t dpl_get_element_at_index(dplist_t *list, int index);
  */
 int dpl_get_index_of_element(dplist_t *list, element_t element);
 
+int dpl_check_head(dplist_t *list);
+
 #endif  //DPLIST_H_
