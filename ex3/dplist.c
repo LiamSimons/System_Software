@@ -69,15 +69,74 @@ dplist_t *dpl_create(// callback functions
 }
 
 void dpl_free(dplist_t **list, bool free_element) {
-
-    //TODO: add your code here
-
+    if(list == NULL){
+        free(list);
+        return;
+    }
+    else if(*list == NULL){
+        free(*list);
+        return;
+    }
+    else if((*list)->head == NULL){
+        free(*list);
+        *list = NULL;
+        return;
+    }
+    else{
+        dplist_t *temp = *list;
+        dplist_node_t *node = temp->head;
+        while(node){
+            if (free_element){
+                (*list)->element_free(node->element);
+            }
+            dplist_node_t *temp = node->next;
+            free(node);
+            node = temp;
+        }
+        free(*list);
+        *list = NULL;
+    }
+    return;
 }
 
 dplist_t *dpl_insert_at_index(dplist_t *list, void *element, int index, bool insert_copy) {
+    dplist_node_t *ref_at_index, *list_node;
+    if (list == NULL) return NULL;
 
-    //TODO: add your code here
-
+    list_node = malloc(sizeof(dplist_node_t));
+    DPLIST_ERR_HANDLER(list_node == NULL, DPLIST_MEMORY_ERROR);
+    list_node->element = element;
+    // pointer drawing breakpoint
+    if (list->head == NULL) { // covers case 1
+        list_node->prev = NULL;
+        list_node->next = NULL;
+        list->head = list_node;
+        // pointer drawing breakpoint
+    } else if (index <= 0) { // covers case 2
+        list_node->prev = NULL;
+        list_node->next = list->head;
+        list->head->prev = list_node;
+        list->head = list_node;
+        // pointer drawing breakpoint
+    } else {
+        ref_at_index = dpl_get_reference_at_index(list, index);
+        assert(ref_at_index != NULL);
+        // pointer drawing breakpoint
+        if (index < dpl_size(list)) { // covers case 4
+            list_node->prev = ref_at_index->prev;
+            list_node->next = ref_at_index;
+            ref_at_index->prev->next = list_node;
+            ref_at_index->prev = list_node;
+            // pointer drawing breakpoint
+        } else { // covers case 3
+            assert(ref_at_index->next == NULL);
+            list_node->next = NULL;
+            list_node->prev = ref_at_index;
+            ref_at_index->next = list_node;
+            // pointer drawing breakpoint
+        }
+    }
+    return list;
 }
 
 dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {

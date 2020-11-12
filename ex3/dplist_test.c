@@ -1,11 +1,16 @@
 /**
  * \author Liam Simons
  */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
 
 #include "dplist.h"
+#include <assert.h>
 #include <check.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 
 typedef struct {
     int id;
@@ -51,7 +56,7 @@ START_TEST(test_ListFree)
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
 
         // Test free NULL, use callback
-        dplist_t *list = NULL;
+        //dplist_t *list = NULL;
         dpl_free(&list, true);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
 
@@ -66,7 +71,14 @@ START_TEST(test_ListFree)
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
 
         // TODO : Test free with one element, also test if inserted elements are set to NULL
-
+        list = dpl_create(element_copy, element_free, element_compare);
+        my_element_t *element = (my_element_t*)malloc(sizeof(my_element_t));
+        element->name = "Liam";
+        element->id = 1;
+        list = dpl_insert_at_index(list, element, 0, false);
+        dpl_free(&list, false);
+        ck_assert_msg(element != NULL, "Failure: expected element to not be NULL");
+        ck_assert_msg(list == NULL, "Failure: expected list to be NULL");
         // TODO : Test free with multiple element, also test if inserted elements are set to NULL
 
     }
