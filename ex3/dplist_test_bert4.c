@@ -123,34 +123,22 @@ START_TEST(test_getElementAtReference)
 }
 END_TEST
 
-START_TEST(test_GetIndex)
+START_TEST(test_getLastElement)
 {
-    // TODO : Test free with one element, also test if inserted elements are set to NULL
+    //at list is NULL
     dplist_t *list = NULL;
+    ck_assert_msg(dpl_get_last_reference(list)==NULL, "Failure: expected NULL for list is NULL");
+    //with one element
     list = dpl_create(element_copy, element_free, element_compare);
-    my_element_t *element1 = (my_element_t*)malloc(sizeof(my_element_t));
+    my_element_t *element1 =(my_element_t*)malloc(sizeof(my_element_t));
     element1->name = "Bert";
     element1->id = 1;
-    my_element_t *element2 = (my_element_t*)malloc(sizeof(my_element_t));
-    element2->name = "Liam";
-    element2->id = 2;
-    my_element_t *element3 = (my_element_t*)malloc(sizeof(my_element_t));
-    element3->name = "Snel";
-    element3->id = 3;
-    list = dpl_insert_at_index(list, (void*)element1, 0, true);
-    list = dpl_insert_at_index(list, (void*)element2, 9, true);
-    ck_assert_msg(dpl_get_index_of_element(list, element1) == 0, "Failure: expected index of element to be 0 but got: %i", dpl_get_index_of_element(list, element1));
-    ck_assert_msg(dpl_get_index_of_element(list, element2) == 1, "Failure: expected index of element to be 1 but got: %i", dpl_get_index_of_element(list, element2));
-    list = dpl_remove_at_index(list, 0, true);
-    ck_assert_msg(dpl_get_index_of_element(list, element2) == 0, "Failure: expected index of element to be 0 but got: %i", dpl_get_index_of_element(list, element2));
-    list = dpl_insert_at_index(list, (void*)element3, 0, true);
-    ck_assert_msg(dpl_get_index_of_element(list, element2) == 1, "Failure: expected index of element to be 1 but got: %i", dpl_get_index_of_element(list, element2));
-    dpl_free(&list,true);
-    ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+    list = dpl_insert_at_index(list,element1,0,false);
+    dplist_node_t *testnode = dpl_get_last_reference(list);
+    dplist_node_t *node = dpl_get_reference_at_index(list,2);
+    ck_assert_msg(testnode == node, "Failure: expected element1 but got something else");
+    dpl_free(&list,false);
     free(element1);
-    //dpl_free(&list, true);
-
-
 }
 END_TEST
 
@@ -184,7 +172,7 @@ int main(void) {
     tcase_add_checked_fixture(tc1_1, setup, teardown);
     tcase_add_test(tc1_1, test_ListFree);
     tcase_add_test(tc1_1, test_getElementAtReference);
-    tcase_add_test(tc1_1, test_GetIndex);
+    tcase_add_test(tc1_1, test_getLastElement);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
