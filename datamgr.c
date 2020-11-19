@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <assert.h>
 #include "./lib/dplist.h"
 #include "config.h"
 #include "datamgr.h"	
@@ -20,23 +21,16 @@ void element_free(void ** element);
 int element_compare(void * x, void * y);
 
 void * element_copy(void * element) {
-    my_element_t* copy = malloc(sizeof (my_element_t));
-    char* new_name;
-    asprintf(&new_name,"%s",((my_element_t*)element)->name);
-    //assert(copy != NULL);
-    copy->id = ((my_element_t*)element)->id;
-    copy->name = new_name;
-    return (void *) copy;
+    return element;
 }
 
 void element_free(void ** element) {
-    free((((my_element_t*)*element))->name);
     free(*element);
     *element = NULL;
 }
 
 int element_compare(void * x, void * y) {
-    return ((((my_element_t*)x)->id < ((my_element_t*)y)->id) ? -1 : (((my_element_t*)x)->id == ((my_element_t*)y)->id) ? 0 : 1);
+    return 0;
 }
 // list aanmaken
 dplist_t *list;
@@ -57,17 +51,17 @@ void datamgr_free(){
 }
 
 uint16_t datamgr_get_room_id(sensor_id_t sensor_id){
-	sensor_data_t *data = dpl_get_element_at_index(list, 0);
+	sensor_data_t *data = (sensor_data_t*)dpl_get_element_at_index(list, 0);
 	return data->id;
 }
 
 sensor_value_t datamgr_get_avg(sensor_id_t sensor_id){
-	sensor_data_t *data = dpl_get_element_at_index(list, 0);
+	sensor_data_t *data = (sensor_data_t*)dpl_get_element_at_index(list, 0);
 	return data->value;
 }
 
 time_t datamgr_get_last_modified(sensor_id_t sensor_id){
-	sensor_data_t *data = dpl_get_element_at_index(list, 0);
+	sensor_data_t *data = (sensor_data_t*)dpl_get_element_at_index(list, 0);
 	return data->ts;
 }
 

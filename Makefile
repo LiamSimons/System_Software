@@ -11,7 +11,7 @@ datamgr: dplist datamgr.c
 	@echo -e '*********compiling for test*********'
 	@echo -e '************************************'
 	mkdir -p build
-	gcc -Wall -Werror -o ./build/datamgr -L./lib/ -Wl,-rpath=./lib/ -ldplist datamgr.c -D SET_MAX_TEMP=30 -D SET_MIN_TEMP=-5
+	gcc -Wall -Werror -o ./build/datamgr -L./lib/ -Wl,-rpath=./lib/ -ldplist datamgr.c dplist.c -D SET_MAX_TEMP=30 -D SET_MIN_TEMP=-5
 
 dplist: lib/dplist.c
 	gcc -fPIC -c ./lib/dplist.c
