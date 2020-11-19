@@ -5,19 +5,14 @@
 #include "datamgr.h"
 
 // CALLBACK FUNCTIONS
-typedef struct {
-    int id;
-    char* name;
-} my_element_t;
-
-void* element_copy(void * element);
-void element_free(void ** element);
+void* element_copy(void * sensor_data);
+void element_free(void ** sensor_data);
 int element_compare(void * x, void * y);
 
-void * element_copy(void * element) {
-    my_element_t* copy = malloc(sizeof (my_element_t));
+void * element_copy(void * sensor_data) {
+    sensor_data_t* copy = malloc(sizeof (sensor_data_t));
     char* new_name;
-    asprintf(&new_name,"%s",((my_element_t*)element)->name);
+    asprintf(&new_id,"%s",((sensor_data_t*)sensor_data)->id);
     assert(copy != NULL);
     copy->id = ((my_element_t*)element)->id;
     copy->name = new_name;
