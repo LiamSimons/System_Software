@@ -1,5 +1,6 @@
 # Create your own targets that build the dynamic library for the list and then compile the application
-
+file_creater: file_creator.c
+	gcc -Wall -DDEBUG -o file_creator file_creator.c
 
 # the files for ex3 will be ziped and are then ready to
 # be submitted to labtools.groept.be
