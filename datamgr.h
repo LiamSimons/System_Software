@@ -75,4 +75,5 @@ time_t datamgr_get_last_modified(sensor_id_t sensor_id);
  */
 int datamgr_get_total_sensors();
 
+void print_list();
 #endif  //DATAMGR_H_
