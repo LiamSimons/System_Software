@@ -54,7 +54,7 @@ void datamgr_free();
 uint16_t datamgr_get_room_id(sensor_id_t sensor_id);
 
 /**
- * Gets the running AVG of a certain senor ID (if less then RUN_AVG_LENGTH measurements are recorded the avg is 0)
+ * Gets the running AVG of a certain sensor ID (if less then RUN_AVG_LENGTH measurements are recorded the avg is 0)
  * Use ERROR_HANDLER() if sensor_id is invalid
  * \param sensor_id the sensor id to look for
  * \return the running AVG of the given sensor

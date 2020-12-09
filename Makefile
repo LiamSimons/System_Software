@@ -7,7 +7,7 @@ test: lib datamgr.c datamgr.h build/
 		@echo -e '\n************************************'
 		@echo -e '*********compiling for datamgr_test.c*********'
 		@echo -e '************************************'
-		gcc datamgr_test.c datamgr.c -ldplist -L./build/lib -Wl,-rpath=./lib -o ./build/test $(FLAGS) -D SET_MAX_TEMP=30 -D SET_MIN_TEMP=-5
+		gcc datamgr_test.c datamgr.c -ldplist -L./build/lib -Wl,-rpath=./lib -o ./build/test $(FLAGS) -D SET_MAX_TEMP=50 -D SET_MIN_TEMP=-10
 		@echo -e '\n************************************'
 		@echo -e '*********running datamgr_test.c*********'
 		@echo -e '************************************'		
