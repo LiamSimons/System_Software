@@ -108,7 +108,7 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
 
 		//Shift to the right
 		double temp_running_av = 0;
-		for(int i = RUN_AVG_LENGTH; i>0; i--){
+		for(int i = RUN_AVG_LENGTH-1; i>0; i--){
 			sensor->temperatures[i] = sensor->temperatures[i-1];
 			temp_running_av += sensor->temperatures[i];
 		}
@@ -200,6 +200,11 @@ void print_list(){
 			sensor_t *dummy;
 			dummy = dpl_get_element_at_index(list, i);
 			printf("SENSOR ID: %hd\tROOM ID: %hd\tRunning average = %lf\n", dummy->sensor_id, dummy->room_id, dummy->running_av);
+			printf("TEMPERATURES: ");
+			for(int i = 0; i<RUN_AVG_LENGTH; i++){
+				printf("%lf\t", dummy->temperatures[i]);
+			}
+			printf("\n\n");
 			i = i + 1;
 		}
 	}
