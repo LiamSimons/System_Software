@@ -17,11 +17,7 @@
 
 // from poll man page
 
-typedef struct pollfd{
-	int fd;			/* 	file descriptor	*/
-	short events;	/* 	requested events*/
-	short revents;	/* 	returned events	*/
-} polldescr;
+typedef struct pollfd polldescr;
 
 
 typedef struct{
@@ -65,3 +61,5 @@ Labtools checklist:
 	- Checking the content of the sensor_data_recv file. The data sent by the sensor nodes should be available in sensor_data_recv.
 
 */
+
+#endif

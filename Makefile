@@ -1,13 +1,12 @@
 # Create your own targets that compile the application
 
-
 # the files for ex2 will be ziped and are then ready to
 # be submitted to labtools.groept.be
 zip:
 	zip lab7_ex2.zip connmgr.c connmgr.h config.h lib/dplist.c lib/dplist.h lib/tcpsock.c lib/tcpsock.h
 
 server:
-	gcc main.c connmgr.c lib/dplist.c lib/tcpsock.c -o server -Wall -Werror -DTIMEOUT=5
+	gcc main.c connmgr.c -ldplist -L./lib -Wl,-rpath=./lib lib/tcpsock.c -o server -Wall -Werror -DTIMEOUT=5
 
 client:
 	gcc sensor_node.c lib/tcpsock.c -o client -Wall -Werror
