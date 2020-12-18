@@ -21,8 +21,9 @@ lin:
 	gcc -shared -o ./lib/libdplist.so ./lib/dplist.o
 
 debug:
-	gcc test.c lib/tcpsock.c lib/dplist.c -o debug -g
-	gdb debug 5678
+	gcc main.c connmgr.c -ldplist -L./lib -Wl,-rpath=./lib lib/tcpsock.c -o debug -g -Wall -Werror -DTIMEOUT=5
+
+	gdb -tui ./debug
 
 valgrind:
 	gcc main.c connmgr.c lib/dplist.c lib/tcpsock.c -o server -Wall -Werror -DTIMEOUT=5 -g
