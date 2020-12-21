@@ -1,117 +1,165 @@
 /*
-from poll man page:
+struct pollfd{
+	int fd; 		// file descriptor for an open file
+	short events;	// requested events		- if 0 only events in revents returned are:
+												1	POLLERR
+												2	POLLHUP
+												3	POLLNVAL
+	short revents;	// returned events
+}
+
+poll(struct pollfd *fds, nfds_t nfds, int timeout);
+
+	1	fds	  	=	is the array of polldescr structs
+	2	nfds    =	number of polldescr in the array - keep this number by size of the dplist
+	3	timeout	=	specifies number of milliseconds poll() should block waiting for file descriptor
+					-> negatives value is infinite timeout
+					-> 0 causes poll() to return immediately
+
+Call will block until:
 	
-	#include <poll.h>
-
-	int poll(struct pollfd *fds, nfds_t nfds, int timeout);
-
-	#define _GNU_SOURCE		// See feature_test_macros(7) 
-	#include <signal.h>
-	#include <poll.h>
-
-	int ppoll(struct pollfd *fds, nfds_t nfds,
-			const struct timespec *tmo_p, const sigset_t *sigmask);
+	1	a file descriptor becomes ready
+	2	call is interrupted by a signal handler
+	3	timeout expires
 */
 
-#define _GNU_SOURCE
 
 #include "connmgr.h"
 
-// List to store the sockets	--------------------------------------------------------------------------------
+// The array to store the structs of each connections 		-------------------------------------------------------------------
+
+typedef struct pollfd polldescr;
+
+
+// The struct of one element to store in a linked list for easy handling	---------------------------------------------------
+
+typedef struct{
+	//sensor_data_t *data;
+	tcpsock_t *socket;
+	time_t last_ts;
+}list_element;
 
 dplist_t *connections;
 
 
-// Callback functions			--------------------------------------------------------------------------------
+// Callback functions		----------------------------------------------------------------------------------------------------
 
 void* copy_element(void *element){
-	pollinfo *copy = malloc(sizeof(pollinfo));
-	copy->file_descriptors = ((pollinfo*)element)->file_descriptors;
-	copy->last_ts = ((pollinfo*)element)->last_ts;
-	copy->sensor_id = ((pollinfo*)element)->sensor_id;
-	copy->socket_id = ((pollinfo*)element)->socket_id;
+	list_element *copy = malloc(sizeof(list_element));
+	//copy->data = ((list_element*)element)->data;
+	copy->socket = ((list_element*)element)->socket;
 	return (void*)copy;
 }
 
 void free_element(void **element){
 	free(*element);
-	return;
 }
 
 int compare_element(void *x, void *y){
+	// unused for now
 	return 0;
 }
 
 
-// Implementation				--------------------------------------------------------------------------------
+// Implementation			----------------------------------------------------------------------------------------------------
 
 void connmgr_listen(int port_number){
-	// start with making a list to store the connections
+	polldescr *poll_array;
 	connections = dpl_create(copy_element, free_element, compare_element);
 
-	// variables - |termination boolean| - |pollinfo poll_server| - |polldescr poll_server_fd| 
-	// 			 - |tcpsock_t *server| 	 - |tcpsock_t *sensor|	  -> one for each side
-	bool terminated = false;
-	pollinfo *poll_server = (pollinfo*)malloc(sizeof(pollinfo));
-	polldescr *poll_server_fd = (polldescr*)malloc(sizeof(polldescr));
+	// variables
+	bool quit = false;
+	poll_array = (polldescr*)malloc(sizeof(polldescr));
+	list_element *server_element = (list_element*)malloc(sizeof(list_element));
 	tcpsock_t *server, *sensor;
 
-	printf("SERVER STARTUP\n");
-	// Making socket connection for the server and getting socket descriptor
+
+	printf("Server is starting up.\n");
+
+	// socket for server
 	if(tcp_passive_open(&server, port_number) != TCP_NO_ERROR){
-		printf("ERROR: can't connect to the SERVER.\n");
+		printf("ERROR: Can't connect SERVER.\n");
+		quit = true;
 	}
-	if(tcp_get_sd(server, &(poll_server_fd->fd)) != TCP_NO_ERROR){
-		printf("ERROR: socket is not bounded to server.\n");
+	if(tcp_get_sd(server, &(poll_array->fd)) != TCP_NO_ERROR){
+		printf("ERROR: Socket can't bound to server.\n");
+		quit = true;
 	}
 
-	// Initialize the server at index 0
-	// put file descriptor in the struct
-	poll_server->file_descriptors = *poll_server_fd;
 	// man page: POLLIN - there is data to read
-	poll_server->file_descriptors.events = POLLIN;
-	poll_server->socket_id = server;
-	poll_server->last_ts = time(NULL);
-	// insert into dpl_list connections
-	connections = dpl_insert_at_index(connections, (void*)(poll_server), 0, true);
+	poll_array->events = POLLIN;
 
-	printf("SERVER connected\n");
+	// Put server in dplist
+	server_element->socket = server;
+	server_element->last_ts = time(NULL);
+	connections = dpl_insert_at_index(connections, (void*)(server_element), 0, true);
 
-	// POLL LOOP
+	printf("Server connected.\n");
+
+	// Server main loop
 	do{
-		// loop over all sockets in connections
 		int nr_connections = dpl_size(connections);
-		for(int i=0; i<nr_connections; i++){
 
-			// poll for new connection or new data
-			pollinfo *new_poll = ((pollinfo*)dpl_get_element_at_index(connections, i));
-			if(poll(&(new_poll->file_descriptors), 1, 0) > 0){
-				// check if data available
-				if(new_poll->file_descriptors.revents == POLLIN){
-					sensor_data_t data;
-					int bytes, result;
-					// incoming connection on server
+		// poll if anything is available
+		int poll_value = poll(poll_array, nr_connections, TIMEOUT*1000);
+
+		// after timeout poll returns 0 so go shut down server
+		if(poll_value == 0){
+			if(nr_connections == 1){
+				tcp_close(&(server_element->socket));
+				free(poll_array);
+				connmgr_free();
+				quit = true;
+				printf("Server timeout.\n");
+			}
+			else{
+				poll_array = realloc(poll_array, sizeof(polldescr));
+				poll_array->fd = 0;
+
+				list_element *dummy_server = dpl_get_element_at_index(connections, 0);
+				dpl_free(&connections, true);
+				connections = dpl_create(copy_element, free_element, compare_element);
+				connections = dpl_insert_at_index(connections, dummy_server, 0, true);
+			}
+		}
+		// MAIN PART
+		else{
+			list_element *dummy_element;
+			for(int i = 0; i < nr_connections; i++){
+				dummy_element = (list_element*)dpl_get_element_at_index(connections, i);
+				if(poll_array[i].revents == POLLIN){
 					if(i == 0){
-						if (tcp_wait_for_connection(new_poll->socket_id, &sensor) != TCP_NO_ERROR) exit(EXIT_FAILURE);
-						pollinfo *new_sensor = (pollinfo*)malloc(sizeof(pollinfo));
-						new_sensor->socket_id = sensor;
-						if(tcp_get_sd(sensor, &(poll_server_fd->fd)) != TCP_NO_ERROR) printf("Sensor not connected.\n");
-						new_sensor->file_descriptors = *poll_server_fd;
-						new_sensor->file_descriptors.events = POLLIN | POLLRDHUP;
+						if(tcp_wait_for_connection(dummy_element->socket, &sensor) != TCP_NO_ERROR) exit(EXIT_FAILURE);
+						// new list element for sensor
+						list_element *new_sensor = (list_element*)malloc(sizeof(list_element));
+						new_sensor->socket = sensor;
 						new_sensor->last_ts = time(NULL);
-						connections = dpl_insert_at_index(connections, (void*)(new_sensor), dpl_size(connections), true);
+						connections = dpl_insert_at_index(connections, (void*)new_sensor, nr_connections, true);
+
+						// get elements out of poll_array
+						dplist_t *dummy_array_list = dpl_create(copy_element, free_element, compare_element);
+						int *temp = (int*)malloc(sizeof(int));
+						for(int j = 0; j < dpl_size(connections); j++){
+							*temp = poll_array[j].fd;
+							dummy_array_list = dpl_insert_at_index(dummy_array_list, (void*)temp, j, true);
+						}
+						// realloc the array
+						poll_array = realloc(poll_array, sizeof(polldescr)*dpl_size(connections));
+
+						for(int j = 0; j < dpl_size(connections); j++){
+							poll_array[j].fd = *(int*)dpl_get_element_at_index(dummy_array_list, j);
+						}
+						dpl_free(&dummy_array_list, true);
+
+						//int new_size = dpl_size(connections);
+						//if(tcp_get_sd(sensor, &((polldescr*)poll_array[new_size]), poll_array[new_size]) != TCP_NO_ERROR) printf("Sensor is not connected\n");						
 						free(new_sensor);
+
 						printf("New sensor is connected.\n");
-						printf("Total amount of sensors connected = %d\n", dpl_size(connections)-1);
-						// if(tcp_receive(server, (void*) &data.id, &bytes) == TCP_CONNECTION_CLOSED){
-						// 	printf("Server can't connect to sensor %d\n", new_poll->sensor_id);
-						// }
 					}
-					// incoming data from sensor
 					else{
-						// from test server:
-
-
+						sensor_data_t data;
+						int bytes, result;
 						bytes = sizeof(data.id);
 			            result = tcp_receive(sensor, (void *) &data.id, &bytes);
 			            // read temperature
@@ -121,8 +169,7 @@ void connmgr_listen(int port_number){
 			            bytes = sizeof(data.ts);
 			            result = tcp_receive(sensor, (void *) &data.ts, &bytes);
 
-			            new_poll->sensor_id = data.id;
-			            new_poll->last_ts = time(NULL);
+			            dummy_element->last_ts = time(NULL);
 
 			            if ((result == TCP_NO_ERROR) && bytes) {
 			                printf("sensor id = %" PRIu16 " - temperature = %g - timestamp = %ld\n", data.id, data.value,
@@ -131,36 +178,15 @@ void connmgr_listen(int port_number){
 			                fprintf(fp, "%d %f %ld\n", data.id, data.value, data.ts);
 			                fclose(fp);
 			            }
-			            // else if(result == TCP_CONNECTION_CLOSED){
-			            // 	printf("Connection lost of sensor %d\n", new_poll->sensor_id);
-			            // }
 					}
 				}
-				// timeout of a sensor
-				if((new_poll->last_ts + TIMEOUT) < time(NULL) && i != 0){
-					printf("Connection lost due to timeout of sensor %d\n", new_poll->sensor_id);
-					tcp_close(&(new_poll->socket_id));
-					connections = dpl_remove_at_index(connections, i, true);
-					poll_server->last_ts = time(NULL);
-				}
-				// printf("Size connections = %i\n", dpl_size(connections));
-				// no sensors connected server timeout
-				
 			}
 		}
-		if(dpl_size(connections) == 1 && (poll_server->last_ts + TIMEOUT) < time(NULL)){
-					printf("No more sensors connected - TIMEOUT exceeded.\nServer shutdown.\n");
-					tcp_close(&(poll_server->socket_id));
-					connmgr_free();
-					terminated = true;
-				}
-	}while(!terminated);
+	}while(!quit);
 
-	free(poll_server_fd);
-	free(poll_server);
-	return;
 }
 
 void connmgr_free(){
+	// polldescr struct is cleared in connmgr_listen() after a timeout
 	dpl_free(&connections, true);
 }
