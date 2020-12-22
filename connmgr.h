@@ -16,15 +16,15 @@
 
 
 // from poll man page
+typedef struct pollfd polldescr;
 
 
-
-// typedef struct{
-// 	polldescr file_descriptors;
-// 	time_t last_ts;
-// 	sensor_id_t sensor_id;
-// 	tcpsock_t *socket_id;
-// }pollinfo;
+typedef struct{
+	polldescr file_descriptors;
+	time_t last_ts;
+	sensor_id_t sensor_id;
+	tcpsock_t *socket_id;
+}pollinfo;
 
 // typedef struct{
 // 	pollinfo *array;
