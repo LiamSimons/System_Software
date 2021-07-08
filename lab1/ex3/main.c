@@ -21,7 +21,7 @@ int main()
 	strcat(name, first);
 	strcat(name, second);
 
-	printf("%s\n %s\n %s\n", first, second, name);
+	printf(" %s\n %s\n %s\n", first, second, name);
 	return 0;
 }
 

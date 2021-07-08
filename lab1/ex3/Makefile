@@ -2,7 +2,7 @@
 # build and execute the main.c file in the ex3 folder
 ex3:
 	mkdir -p build
-	gcc -Wall -Werror -o ./build/ex3 main.c ma_malloc.c
+	gcc -Wall -Werror -o ./build/ex3 main.c
 	./build/ex3
 
 ex1:

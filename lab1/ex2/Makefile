@@ -5,6 +5,11 @@ ex3:
 	gcc -Wall -Werror -o ./build/ex3 main.c ma_malloc.c
 	./build/ex3
 
+ex2:
+	mkdir -p build
+	gcc -Wall -Werror -o ./build/ex2 main.c
+	./build/ex2
+
 ex1:
 	mkdir -p build
 	gcc -Wall -Werror -o ./build/ex1 main.c 
