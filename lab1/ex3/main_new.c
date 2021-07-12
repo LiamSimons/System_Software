@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -21,5 +22,15 @@ int main()
 	strcat(name, second);
 
 	printf(" %s\n %s\n %s\n", first, second, name);
+	char upperName[2*MAX + 1];
+	printf("Sizeof name: %li\n", sizeof(name));
+	for(int i = 0; i < sizeof(name); i++){
+		printf("Toupper input: %c\n", name[i]);
+		upperName[i] = toupper(name[i]);
+	}
+
+	printf("\nExtra added on 10 July 2021: \n");
+	printf("Upper:\t%s\n", upperName);
 	return 0;
 }
+
