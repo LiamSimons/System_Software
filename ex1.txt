@@ -1,0 +1,5 @@
+ DYNAMIC MEMORY ALLOCATOR
+
+ First thing you need is a: memory pool
+	- malloc():		search for a free chunk of memory and mark it as 'allocated'
+	- free():		mark corresponding memory chunk as 'free'
