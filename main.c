@@ -3,9 +3,9 @@
 #include <time.h>
 #include <unistd.h>
 
-#define FREQUENCY	1	//SECONDS
-#define MIN_TEMP	-1	//°C
-#define MAX_TEMP	3	//°C
+#define FREQUENCY	1	// TIMES PER SECOND
+#define MIN_TEMP	-10	// °C
+#define MAX_TEMP	35	// °C
 
 int main(){
 	time_t t;												//used as seed for the srand function
@@ -15,7 +15,9 @@ int main(){
 	int temp_range = MAX_TEMP - MIN_TEMP;					//calculate the range of values the srand can have
 	
 	while(1){												
-		printf("%d\n", (rand()%(temp_range+1) + MIN_TEMP));	//print random values in the range specified
+		
+		printf("Temperature = <%1.2f°C>@<%c>\n", (((float)(rand()%((temp_range+1)*100))/100) + MIN_TEMP), system("date"));	
+															//print random values in the range specified
 		sleep(1/FREQUENCY);									//sleep for the inverse of the frequency = period
 		fflush(stdout);										//this is a buffered function and this prevents buildup in the buffer
 	}
