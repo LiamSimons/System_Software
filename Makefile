@@ -5,6 +5,11 @@ ex1:
 	gcc -Wall -Werror -o ./build/ex1 main.c
 	./build/ex1
 
+ex1_idea:
+	mkdir -p build
+	gcc -Wall -Werror -o ./build/ex1_idea ex1_idea.c
+	./build/ex1_idea
+
 # the main file in the ex3 folder will be ziped and is then ready to
 # be submitted to labtools.groept.be
 zip:
