@@ -32,3 +32,11 @@ Every branch contains a `.gitignore` file that instructs git to automatically ig
 A good habit is to put all compiled files in a `./build` folder (e.g. check the makefile in lab1 and lab2). This folder is also included in `.gitignore`, this way no compiled files wil go into your repository.
 
 You can change/update this `.gitignore` file in every branch, so it fits the needs for your lab assignment.
+
+
+## TESTS
+In the docs is the information about the test scripts.
+These test scripts are to clarify some questions I had.
+
+## gitlab
+In this folder are the older ma_malloc.c & .h & main.c from gitlab.

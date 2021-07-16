@@ -20,7 +20,7 @@ typedef enum {
 
 typedef enum{
 	HEADER, FOOTER
-}mem_type;
+} mem_type;
 
 //! Every item in the pool will have at least a header with size and status of the following data
 typedef struct {

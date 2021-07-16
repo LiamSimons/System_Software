@@ -1,0 +1,12 @@
+Test 1:
+	- Shows what a array variable actually is
+	- "static byte mem_pool[600]"
+	- "mem_pool" = a pointer to the first element of the array
+	- this means "&mem_pool[0]" = "mem_pool"
+	- because they are both the pointer to the address of the first element
+
+Test 2:
+	- This test shows why you don't have to do -1 when assigning the footer
+	- It also shows you can find the footer in two ways:
+		addressWay: get the address of the mem_pool head and add to that address
+		arrayWay:	get the address of the element of the array at the place of the footer

@@ -71,6 +71,6 @@ int main(int argc, char *argv[]) {
     ma_free(ptr[2]); //-> mind the sequence, first free 1 than 2
 //sketch 6
     assert(NULL != ma_malloc(250)); //-> should not return NULL (test for coalescing)
-
+	printf("MAIN DONE\n");
     return 0;
 }

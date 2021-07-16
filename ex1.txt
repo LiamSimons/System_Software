@@ -1,5 +1,22 @@
- DYNAMIC MEMORY ALLOCATOR
+DYNAMIC MEMORY ALLOCATOR
 
- First thing you need is a: memory pool
+First thing you need is a: memory pool
 	- malloc():		search for a free chunk of memory and mark it as 'allocated'
 	- free():		mark corresponding memory chunk as 'free'
+
+Header per chunk:
+	- size
+	- status ('allocated' | 'free')
+
+-----------------------------------------------------------------------------------------------|
+
+ALLOCATING MEMORY
+
+Placement policy:
+	- 'first fit':	returns first free chunk that fits
+	- 'best fit':	returns smallest free chunk that fits
+
+FREEING MEMORY
+
+Mark chunk 'free'
+	- see ex2 for better policy
