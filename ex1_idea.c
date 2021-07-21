@@ -11,7 +11,8 @@ void date_struct(int day, int month, int year, date_t* date){
 	dummy.day = (short)day;		
 	dummy.month = (short)month;
 	dummy.year = (unsigned)year;
-	*date = dummy;
+	*date = dummy; 					//date = &dummy;	//code in ex1 that doesn't work
+	//this works 
 }
 
 int main(void){
