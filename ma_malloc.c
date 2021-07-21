@@ -30,7 +30,6 @@ typedef enum{
 typedef struct {
     size size;
     mem_status status;
-    //mem_type type;
 } mem_chunk_header;
 
 
@@ -54,7 +53,7 @@ void ma_init(){
 }
 
 void *ma_malloc(size tsize){
-	mem_chunk_header* free_chunk_header = NULL;	
+	void* free_chunk_header = NULL;	
 	mem_chunk_header* dummy_header = NULL;
 	size dummy_index = 0;
 
@@ -72,16 +71,16 @@ void *ma_malloc(size tsize){
 	}
 	// Allocate the memory chunk
 	if(free_chunk_header != NULL){
-		size new_free_size = free_chunk_header->size - (tsize + 2*header_size);
+		size new_free_size = dummy_header->size - (tsize + 2*header_size);
 		
-		free_chunk_header->status = ALLOCATED;
-		free_chunk_header->size = tsize;
+		dummy_header->status = ALLOCATED;
+		dummy_header->size = tsize;
 
-		mem_chunk_header* alloc_footer = (mem_chunk_header*)(free_chunk_header + tsize + header_size);
+		mem_chunk_header* alloc_footer = (mem_chunk_header*)((byte*)free_chunk_header + tsize + header_size);
 		alloc_footer->status = ALLOCATED;
 		alloc_footer->size = tsize;
 
-		mem_chunk_header* new_free_header = (mem_chunk_header*)(free_chunk_header + tsize + 2*header_size);
+		mem_chunk_header* new_free_header = (mem_chunk_header*)((byte*)free_chunk_header + tsize + 2*header_size);
 		new_free_header->status = FREE;
 		new_free_header->size = new_free_size;
 	}
@@ -89,7 +88,32 @@ void *ma_malloc(size tsize){
 }
 
 void ma_free(void *ptr){
+	mem_chunk_header* header = (mem_chunk_header*) ptr;
+	mem_chunk_header* footer = (mem_chunk_header*)(ptr + header->size + header_size);
+	header->status = FREE;
+	footer->status = FREE;
 
+	//Coalescing
+	mem_chunk_header* prev = header - 1;
+	mem_chunk_header* next = footer + 1;
+	//Check header not first and footer not last
+	if(header != (mem_chunk_header*)mem_pool){
+		if(prev->status == FREE){
+			size prev_size = prev->size;
+			mem_chunk_header* prev_header = (mem_chunk_header*)((byte*)header - prev_size - 2*header_size);
+			prev_header->size = header->size + prev_size + 2*header_size;
+			footer->size = prev_header->size;
+			header = prev_header;	//needed for when next chunk is free
+		}		
+	}
+	if(footer != (mem_chunk_header*)&(mem_pool[MEM_POOL_SIZE - header_size])){
+		if(next->status == FREE){
+			size next_size = next->size;
+			mem_chunk_header* next_footer = (mem_chunk_header*)((byte*)footer + next_size + 2*header_size); //this byte pointer cast made it work idk why
+			header->size = header->size + next_size + 2*header_size;
+			next_footer->size = header->size;
+		}
+	}
 }
 
 void ma_print(void){
