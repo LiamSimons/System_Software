@@ -200,35 +200,85 @@ int dpl_get_index_of_element(dplist_t *list, void* element){
 	return -1;
 }
 void *dpl_get_element_at_reference(dplist_t *list, dplist_node_t *reference){
+	if(list == NULL || dpl_size(list) == 0 || reference == NULL) return NULL;
+	else{
+		dplist_node_t* dummy = list->head;
+		while(dummy){
+			if(dummy == reference) return dummy->element;
+			else dummy = dummy->next;
+		}
+	}
 	return NULL;
 }
 dplist_node_t *dpl_get_first_reference(dplist_t *list){
 	return NULL;
 }
 dplist_node_t *dpl_get_last_reference(dplist_t *list){
-	return NULL;
+	if(list == NULL) return NULL;
+	int size = dpl_size(list);
+	if(size == 0) return NULL;
+	else return dpl_get_reference_at_index(list, size - 1);
 }
 dplist_node_t *dpl_get_next_reference(dplist_t *list, dplist_node_t *reference){
+	if(list == NULL || dpl_size(list) == 0 || reference == NULL) return NULL;
+	else{
+		dplist_node_t* dummy = list->head;
+		while(dummy){
+			if(dummy == reference) return dummy->next;
+			else dummy = dummy->next;
+		}
+	}
 	return NULL;
 }
 dplist_node_t *dpl_get_previous_reference(dplist_t *list, dplist_node_t *reference){
+	if(list == NULL || dpl_size(list) == 0 || reference == NULL) return NULL;
+	else{
+		dplist_node_t* dummy = list->head;
+		while(dummy){
+			if(dummy == reference) return dummy->prev;
+			else dummy = dummy->next;
+		}
+	}
 	return NULL;
 }
 dplist_node_t *dpl_get_reference_of_element(dplist_t *list, void *element){
+	if(list == NULL || dpl_size(list) == 0 || element == NULL) return NULL;
+	else{
+		dplist_node_t* dummy = list->head;
+		while(dummy){
+			if(dummy->element == element) return dummy;
+			else dummy = dummy->next;
+		}
+	}
 	return NULL;
 }
 int dpl_get_index_of_reference(dplist_t *list, dplist_node_t *reference){
+	if(list == NULL || dpl_size(list) == 0) return -1;
+	else{
+		int count = 0;
+		dplist_node_t* dummy = list->head;
+		while(dummy){
+			if(dummy == reference) return count;
+			else{
+				dummy = dummy->next;
+				count++;
+			}
+		}
+	}
 	return -1;
 }
 dplist_t *dpl_insert_at_reference(dplist_t *list, void *element, dplist_node_t *reference, bool insert_copy){
+	list = dpl_insert_at_index(list, element, dpl_get_index_of_reference(list, reference), insert_copy);
 	return list;
 }
 dplist_t *dpl_insert_sorted(dplist_t *list, void *element, bool insert_copy){
 	return list;
 }
 dplist_t *dpl_remove_at_reference(dplist_t *list, dplist_node_t *reference, bool free_element){
+	list = dpl_remove_at_index(list, dpl_get_index_of_reference(list, reference), free_element);
 	return list;
 }
 dplist_t *dpl_remove_element(dplist_t *list, void *element, bool free_element){
+	list = dpl_remove_at_index(list, dpl_get_index_of_element(list, element), free_element);
 	return list;
 }

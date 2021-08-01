@@ -119,7 +119,7 @@ START_TEST(test_getElementAtReference)
     ck_assert_msg((((my_element_t*)dpl_get_element_at_reference(list, dpl_get_reference_at_index(list,0)))->id)==1, "Failure: for list with one element should return element2");
     dpl_free(&list,false);
     free(element2);
-    //at list with multiple elements    
+    //at list with multiple elements    */
 }
 END_TEST
 
