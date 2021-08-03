@@ -189,14 +189,14 @@ int dpl_get_index_of_element(dplist_t *list, void* element){
 	if(list->head == NULL) return -1;
 	dplist_node_t* dummy;
 	dummy = list->head;
-	if(dummy->element == element) return 0;
+	if((list->element_compare(dummy->element, element)) == 0) return 0;
 	int index = 0;
 	while(dummy->next != NULL){
-		if(dummy->element == element) return index;
+		if((list->element_compare(dummy->element, element)) == 0) return index;
 		dummy = dummy->next;
 		index ++;
 	}
-	if(dummy->element == element) return index;
+	if(list->element_compare(dummy->element, element)) == 0) return index;
 	return -1;
 }
 //-----------------------------------------------------------------------------//
@@ -246,7 +246,7 @@ dplist_node_t *dpl_get_reference_of_element(dplist_t *list, void *element){
 	else{
 		dplist_node_t* dummy = list->head;
 		while(dummy){
-			if(dummy->element == element) return dummy;
+			if(list->element_compare(dummy->element, element)) == 0) return dummy;
 			else dummy = dummy->next;
 		}
 	}

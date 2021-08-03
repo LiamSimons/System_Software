@@ -245,6 +245,23 @@ START_TEST(test_remove){
 	free(element3);*/
 }END_TEST
 
+START_TEST(test_index_of_element){
+	dplist_t* list = NULL;
+	list = dpl_create(element_copy, element_free, element_compare);
+	my_element_t *element = (my_element_t*)malloc(sizeof(my_element_t));
+    element->name = "Liam";
+    element->id = 1;
+	list = dpl_insert_at_index(list, element, 0, false);
+	int index = dpl_get_index_of_element(list, element);
+	ck_assert_msg(index == 0, "Failure: expected index to be 0 but got %d", index);
+	my_element_t *element2 = (my_element_t*)malloc(sizeof(my_element_t));
+    element2->name = "Simons";
+    element2->id = 2;
+	list = dpl_insert_at_index(list, element2, 1, false);
+	index = dpl_get_index_of_element(list, element2);
+	ck_assert_msg(index == 1, "Failure: expected index to be 1 but got %d", index);
+}END_TEST
+
 
 
 //START_TEST(test_nameOfYourTest)
@@ -281,6 +298,7 @@ int main(void) {
 	tcase_add_test(tc1_1, test_get_element_at_reference);
 	tcase_add_test(tc1_1, test_get_first_last_reference);
 	tcase_add_test(tc1_1, test_remove);
+	tcase_add_test(tc1_1, test_index_of_element);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
