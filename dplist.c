@@ -182,7 +182,7 @@ dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index){
 void* dpl_get_element_at_index(dplist_t *list, int index){
 	if(list == NULL) return NULL;
 	if(list->head == NULL) return NULL;
-	return (void*)dpl_get_reference_at_index(list, index)->element;
+	return (void*)(dpl_get_reference_at_index(list, index)->element);
 }
 int dpl_get_index_of_element(dplist_t *list, void* element){
 	if(list == NULL) return -1;

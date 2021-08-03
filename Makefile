@@ -94,6 +94,9 @@ valgrind_bert:
 	
 .PHONY : clean check
 
+zip:
+	zip ../lab4.zip dplist.c
+
 check : $(SOURCE) $(HEADERS)
 	@echo "Running cppcheck :"
 	cppcheck --enable=all --suppress=missingIncludeSystem --error-exitcode=1 $(SOURCE) $(HEADERS)

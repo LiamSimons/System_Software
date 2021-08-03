@@ -1,5 +1,5 @@
 /**
- * \author Liam Van Cauter
+ * \author Liam Simons
  */
 #define _GNU_SOURCE
 #include "dplist.h"
@@ -207,10 +207,42 @@ START_TEST(test_get_first_last_reference){
 	// GET REFERENCE OF ELEMENT
 	dplist_node_t* ref_of_el = dpl_get_reference_of_element(list, returned_element5);
 	ck_assert_msg(ref_of_el == prev_node, "Failure: expected ref_of_el and prev_node to be equal");
-	
+
 	dpl_free(&list, false);
 	free(element);
 	free(element2);
+}END_TEST
+
+START_TEST(test_remove){
+	dplist_t* list = NULL;
+	list = dpl_create(element_copy, element_free, element_compare);
+	my_element_t *element = (my_element_t*)malloc(sizeof(my_element_t));
+    element->name = "Liam";
+    element->id = 1;
+	/*my_element_t *element2 = (my_element_t*)malloc(sizeof(my_element_t));
+    element2->name = "Simons";
+    element2->id = 2;
+	my_element_t *element3 = (my_element_t*)malloc(sizeof(my_element_t));
+    element2->name = "Max";
+    element2->id = 3;*/
+	list = dpl_insert_at_index(list, element, 0, true);
+	list = dpl_insert_at_index(list, element, 0, true);
+	list = dpl_insert_at_index(list, element, 0, true);
+
+	ck_assert_msg(dpl_size(list) == 3, "Failure: expected size 3 but got %d", dpl_size(list));
+	list = dpl_remove_at_index(list, 942543, true);
+	ck_assert_msg(dpl_size(list) == 2, "Failure: expected size 0 but got %d", dpl_size(list));
+
+	list = dpl_remove_at_index(list, -2135, true);
+	ck_assert_msg(dpl_size(list) == 1, "Failure: expected size 0 but got %d", dpl_size(list));
+
+	list = dpl_remove_at_index(list, -1, true);
+	ck_assert_msg(dpl_size(list) == 0, "Failure: expected size 0 but got %d", dpl_size(list));
+
+	dpl_free(&list, true);
+	free(element);
+	/*free(element2);
+	free(element3);*/
 }END_TEST
 
 
@@ -248,6 +280,7 @@ int main(void) {
     tcase_add_test(tc1_1, test_getLastElement);
 	tcase_add_test(tc1_1, test_get_element_at_reference);
 	tcase_add_test(tc1_1, test_get_first_last_reference);
+	tcase_add_test(tc1_1, test_remove);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
