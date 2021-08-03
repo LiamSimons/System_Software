@@ -199,6 +199,7 @@ int dpl_get_index_of_element(dplist_t *list, void* element){
 	if(dummy->element == element) return index;
 	return -1;
 }
+//-----------------------------------------------------------------------------//
 void *dpl_get_element_at_reference(dplist_t *list, dplist_node_t *reference){
 	if(list == NULL || dpl_size(list) == 0 || reference == NULL) return NULL;
 	else{
@@ -211,13 +212,12 @@ void *dpl_get_element_at_reference(dplist_t *list, dplist_node_t *reference){
 	return NULL;
 }
 dplist_node_t *dpl_get_first_reference(dplist_t *list){
-	return NULL;
+	if(list == NULL || dpl_size(list) == 0) return NULL;
+	else return dpl_get_reference_at_index(list, 0);
 }
 dplist_node_t *dpl_get_last_reference(dplist_t *list){
-	if(list == NULL) return NULL;
-	int size = dpl_size(list);
-	if(size == 0) return NULL;
-	else return dpl_get_reference_at_index(list, size - 1);
+	if(list == NULL || dpl_size(list) == 0) return NULL;
+	else return dpl_get_reference_at_index(list, dpl_size(list) - 1);
 }
 dplist_node_t *dpl_get_next_reference(dplist_t *list, dplist_node_t *reference){
 	if(list == NULL || dpl_size(list) == 0 || reference == NULL) return NULL;

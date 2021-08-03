@@ -1,5 +1,5 @@
 /**
- * \author Bert Van Cauter
+ * \author Liam Van Cauter
  */
 #define _GNU_SOURCE
 #include "dplist.h"
@@ -69,7 +69,7 @@ START_TEST(test_ListFree)
     // TODO : Test free with one element, also test if inserted elements are set to NULL
     list = dpl_create(element_copy, element_free, element_compare);
     my_element_t *element1 = (my_element_t*)malloc(sizeof(my_element_t));
-    element1->name = "Bert";
+    element1->name = "Liam";
     element1->id = 1;
     list = dpl_insert_at_index(list, (void*)element1, 0, true);
     dpl_free(&list,true);
@@ -78,10 +78,10 @@ START_TEST(test_ListFree)
     // TODO : Test free with multiple element, also test if inserted elements are set to NULL
     list = dpl_create(element_copy, element_free, element_compare);
     my_element_t *element = (my_element_t*)malloc(sizeof(my_element_t));
-    element->name = "Bert";
+    element->name = "Liam";
     element->id = 1;
     my_element_t *element2 = (my_element_t*)malloc(sizeof(my_element_t));
-    element2->name = "Emma";
+    element2->name = "Max";
     element2->id = 2;
     list = dpl_insert_at_index(list, element, 0, false);
     list = dpl_insert_at_index(list, element2, 1, false);
@@ -97,7 +97,7 @@ START_TEST(test_getElementAtReference)
     //at List is NULL
     dplist_t *list = NULL; 
     my_element_t *element = (my_element_t*)malloc(sizeof(my_element_t));
-    element->name = "Bert";
+    element->name = "Liam";
     element->id = 1;
     ck_assert_msg(dpl_get_element_at_reference(list,NULL)==NULL, "Failure: for list is NULL should return NULL");
     dpl_free(&list, true);
@@ -105,7 +105,7 @@ START_TEST(test_getElementAtReference)
     //at list->head == NULL 
     list = dpl_create(element_copy, element_free, element_compare);
     my_element_t *element1 =(my_element_t*)malloc(sizeof(my_element_t));
-    element1->name = "Bert";
+    element1->name = "Liam";
     element1->id = 1;
     ck_assert_msg(dpl_get_element_at_reference(list, NULL)==NULL, "Failure: for list->head is NUL should return NULL");
     dpl_free(&list,true);
@@ -113,7 +113,7 @@ START_TEST(test_getElementAtReference)
     //at list one element
     list = dpl_create(element_copy, element_free, element_compare);
     my_element_t *element2 =(my_element_t*)malloc(sizeof(my_element_t));
-    element2->name = "Bert";
+    element2->name = "Liam";
     element2->id = 1;
     list = dpl_insert_at_index(list, element2,0, false);
     ck_assert_msg((((my_element_t*)dpl_get_element_at_reference(list, dpl_get_reference_at_index(list,0)))->id)==1, "Failure: for list with one element should return element2");
@@ -131,7 +131,7 @@ START_TEST(test_getLastElement)
     //with one element
     list = dpl_create(element_copy, element_free, element_compare);
     my_element_t *element1 =(my_element_t*)malloc(sizeof(my_element_t));
-    element1->name = "Bert";
+    element1->name = "Liam";
     element1->id = 1;
     list = dpl_insert_at_index(list,element1,0,false);
     dplist_node_t *testnode = dpl_get_last_reference(list);
@@ -141,6 +141,79 @@ START_TEST(test_getLastElement)
     free(element1);
 }
 END_TEST
+
+START_TEST(test_get_element_at_reference){
+	dplist_t* list = NULL;
+	ck_assert_msg(dpl_get_element_at_reference(list, NULL) == NULL, "Failure: expected NULL");
+	list = dpl_create(element_copy, element_free, element_compare);
+	my_element_t *element = (my_element_t*)malloc(sizeof(my_element_t));
+    element->name = "Liam";
+    element->id = 1;
+	list = dpl_insert_at_index(list, element, 0, false);
+	ck_assert_msg(dpl_size(list) == 1, "Failure: expected size to be 1 but got %d", dpl_size(list));
+	dplist_node_t* node = dpl_get_reference_at_index(list, 0);
+	my_element_t* returned_element = (my_element_t*)dpl_get_element_at_reference(list, node);
+	ck_assert_msg(returned_element->id == 1, "Failure: expected returned element id to be 1");
+	ck_assert_msg(strcmp(returned_element->name, "Liam") == 0, "Failure: expected returned element name to be Liam");
+	dpl_free(&list, false);
+	ck_assert_msg(list == NULL, "Failure: expected list to be NuLL");
+	free(element);
+}END_TEST
+
+START_TEST(test_get_first_last_reference){
+	dplist_t* list = NULL;
+	ck_assert_msg(dpl_get_first_reference(list) == NULL, "Failure: expected NULL");
+	ck_assert_msg(dpl_get_last_reference(list) == NULL, "Failure: expected NULL");
+	list = dpl_create(element_copy, element_free, element_compare);
+	my_element_t *element = (my_element_t*)malloc(sizeof(my_element_t));
+    element->name = "Liam";
+    element->id = 1;
+	my_element_t *element2 = (my_element_t*)malloc(sizeof(my_element_t));
+    element2->name = "Simons";
+    element2->id = 2;
+	list = dpl_insert_at_index(list, element, 0, false);
+	list = dpl_insert_at_index(list, element2, 1, false);
+	my_element_t* dummy = dpl_get_element_at_index(list, 0);
+	ck_assert_msg(dummy->id == 1, "Failure: expected dummy id to be 1 but got %d", dummy->id);
+
+	dplist_node_t* node = dpl_get_first_reference(list);
+	my_element_t* returned_element = (my_element_t*)dpl_get_element_at_reference(list, node);
+	ck_assert_msg(returned_element->id == 1, "Failure: expected returned element id to be 1 but got %d", returned_element->id);
+	ck_assert_msg(strcmp(returned_element->name, "Liam") == 0, "Failure: expected returned element name to be Liam");
+	dplist_node_t* node2 = dpl_get_last_reference(list);
+	my_element_t* returned_element2 = (my_element_t*)dpl_get_element_at_reference(list, node2);
+	ck_assert_msg(returned_element2->id == 2, "Failure: expected returned element id to be 2 but got %d", returned_element->id);
+	ck_assert_msg(strcmp(returned_element2->name, "Simons") == 0, "Failure: expected returned element name to be Simons");
+
+	// NEXT reference
+	dplist_node_t* next_node = dpl_get_next_reference(list, node);
+	my_element_t* returned_element3 = (my_element_t*)dpl_get_element_at_reference(list, next_node);
+	ck_assert_msg(returned_element3->id == 2, "Failure: expected returned element id to be 2 but got %d", returned_element->id);
+	ck_assert_msg(strcmp(returned_element3->name, "Simons") == 0, "Failure: expected returned element name to be Simons");
+	// NEXT reference without any next
+	dplist_node_t* no_node = dpl_get_next_reference(list, node2);
+	my_element_t* returned_element4 = (my_element_t*)dpl_get_element_at_reference(list, no_node);
+	ck_assert_msg(returned_element4 == NULL, "Failure: expected returned element id to be 2 but got %d", returned_element->id);
+	// NEXT with reference NULL
+	dplist_node_t* null_node = dpl_get_next_reference(list, NULL);
+	ck_assert_msg(null_node == NULL, "Failure: expected returned element id to be 2 but got %d", returned_element->id);
+
+	// PREVIOUS reference
+	dplist_node_t* prev_node = dpl_get_previous_reference(list, node2);
+	my_element_t* returned_element5 = (my_element_t*)dpl_get_element_at_reference(list, prev_node);
+	ck_assert_msg(returned_element5->id == 1, "Failure: expected returned element id to be 2 but got %d", returned_element->id);
+	ck_assert_msg(strcmp(returned_element5->name, "Liam") == 0, "Failure: expected returned element name to be Simons");
+	
+	// GET REFERENCE OF ELEMENT
+	dplist_node_t* ref_of_el = dpl_get_reference_of_element(list, returned_element5);
+	ck_assert_msg(ref_of_el == prev_node, "Failure: expected ref_of_el and prev_node to be equal");
+	
+	dpl_free(&list, false);
+	free(element);
+	free(element2);
+}END_TEST
+
+
 
 //START_TEST(test_nameOfYourTest)
 //  Add other testcases here...
@@ -173,6 +246,8 @@ int main(void) {
     tcase_add_test(tc1_1, test_ListFree);
     tcase_add_test(tc1_1, test_getElementAtReference);
     tcase_add_test(tc1_1, test_getLastElement);
+	tcase_add_test(tc1_1, test_get_element_at_reference);
+	tcase_add_test(tc1_1, test_get_first_last_reference);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
