@@ -9,18 +9,7 @@ test :
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
 	mkdir -p build
-	gcc dplist.c dplist_test.c -o build/dplist_test $(FLAGS)
-	@echo -e '\n*************************'
-	@echo -e '*** Running UNIT TEST ***'
-	@echo -e '*************************'
-	./build/dplist_test
-
-bert :
-	@echo -e '\n*******************************'
-	@echo -e '*** Compiling for UNIT TEST ***'
-	@echo -e '*******************************'
-	mkdir -p build
-	gcc dplist.c dplist_test_bert4.c -o build/dplist_test $(FLAGS)
+	gcc dplist.c dplist_test_2.c -o build/dplist_test $(FLAGS)
 	@echo -e '\n*************************'
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
@@ -31,7 +20,7 @@ copy :
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
 	mkdir -p build
-	gcc dplist_copy.c dplist_test_bert4.c -o build/dplist_test $(FLAGS)
+	gcc dplist_copy.c dplist_test_2.c -o build/dplist_test $(FLAGS)
 	@echo -e '\n*************************'
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
@@ -75,18 +64,7 @@ valgrind:
 	@echo -e '*** Compiling for DEBUG ***'
 	@echo -e '*******************************'
 	mkdir -p build
-	gcc dplist.c dplist_test.c -o build/dplist_test $(FLAGS) -g
-	@echo -e '\n*************************'
-	@echo -e '*** Running UNIT TEST DEBUG ***'
-	@echo -e '*************************'
-	CK_FORK=0 valgrind --leak-check=full ./build/dplist_test
-
-valgrind_bert:
-	@echo -e '\n*******************************'
-	@echo -e '*** Compiling for DEBUG ***'
-	@echo -e '*******************************'
-	mkdir -p build
-	gcc dplist.c dplist_test_bert4.c -o build/dplist_test $(FLAGS) -g
+	gcc dplist.c dplist_test_2.c -o build/dplist_test $(FLAGS) -g
 	@echo -e '\n*************************'
 	@echo -e '*** Running UNIT TEST DEBUG ***'
 	@echo -e '*************************'

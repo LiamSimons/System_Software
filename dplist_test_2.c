@@ -260,6 +260,9 @@ START_TEST(test_index_of_element){
 	list = dpl_insert_at_index(list, element2, 1, false);
 	index = dpl_get_index_of_element(list, element2);
 	ck_assert_msg(index == 1, "Failure: expected index to be 1 but got %d", index);
+	free(element);
+	free(element2);
+	dpl_free(&list, false);
 }END_TEST
 
 

@@ -196,7 +196,7 @@ int dpl_get_index_of_element(dplist_t *list, void* element){
 		dummy = dummy->next;
 		index ++;
 	}
-	if(list->element_compare(dummy->element, element)) == 0) return index;
+	if((list->element_compare(dummy->element, element)) == 0) return index;
 	return -1;
 }
 //-----------------------------------------------------------------------------//
@@ -246,7 +246,7 @@ dplist_node_t *dpl_get_reference_of_element(dplist_t *list, void *element){
 	else{
 		dplist_node_t* dummy = list->head;
 		while(dummy){
-			if(list->element_compare(dummy->element, element)) == 0) return dummy;
+			if((list->element_compare(dummy->element, element)) == 0) return dummy;
 			else dummy = dummy->next;
 		}
 	}
