@@ -19,7 +19,7 @@ typedef struct {
 } sensor_t;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CALLBACK FUNCTIONS
+// CALLBACK FUNCTIONS - for dplist
 
 void* element_copy(void * element);
 void element_free(void ** element);
@@ -140,15 +140,7 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
 }
 
 void datamgr_free(){
-	// int size = dpl_size(list);
-	// while(size > 0){
-	// 	dplist_node_t *dummy = dpl_get_reference_at_index(list, size-1);
-	// 	sensor_data_t *sensor_dummy;
-	// 	sensor_dummy = dummy->element;
-	// 	free(sensor_dummy);
-	// }
 	dpl_free(&list, true);
-	//printf("Size of list ater free = %i\n", dpl_size(list));
 }
 
 uint16_t datamgr_get_room_id(sensor_id_t sensor_id){

@@ -8,6 +8,9 @@ test:	mkdir
 # Step 4: making the library available at runtime
 # echo $LD_LIBRARY_PATH    -> reveals there is nothing in there
 # export LD_LIBRARY_PATH=/home/liam/Desktop/Sysprog/lab5/Tests/build:$LD_LIBRARY_PATH
+#	-> this is on the site (https://www.cprogramming.com/tutorial/shared-libraries-linux-gcc.html)
+# export LD_LIBRARY_PATH=./build
+#	-> this worked as well
 
 mkdir:
 	mkdir -p build
