@@ -3,7 +3,7 @@ FLAGS = -std=c11 -Werror -lm $(shell pkg-config --cflags --libs check)
 datamgr: lib datamgr.c datamgr.h build/
 		gcc datamgr.c -ldplist -L./build/lib -Wl,-rpath=./lib -o ./build/datamgr -D SET_MAX_TEMP=30 -D SET_MIN_TEMP=-5
 
-test: lib datamgr.c datamgr.h build/
+test: lib datamgr.c datamgr.h build/	# Step 4
 		@echo -e '\n************************************'
 		@echo -e '*********compiling for datamgr_test.c*********'
 		@echo -e '************************************'
