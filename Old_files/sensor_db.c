@@ -17,7 +17,8 @@ DBCONN *init_connection(char clear_up_flag){
 
 	//tutorial
 	sqlite3 *db;
-	
+	//sqlite3_stmt *res;
+
 	int rc = sqlite3_open(dbname, &db);
 
 	if(rc != SQLITE_OK){
@@ -25,6 +26,22 @@ DBCONN *init_connection(char clear_up_flag){
 		sqlite3_close(db);
 		return NULL;
 	}
+
+	/*rc = sqlite3_prepare_v2(db, "SELECT SQLITE_VERSION()", -1, &res, 0);
+
+	if(rc != SQLITE_OK){
+		fprintf(stderr, "Failed to fetch data: %s\n", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return NULL;
+	}
+
+	rc = sqlite3_step(res);
+
+	if(rc == SQLITE_ROW){
+		printf("%s\n", sqlite3_column_text(res, 0));
+	}
+
+	sqlite3_finalize(res);*/
 	if(clear_up_flag == 1){
 		char sql[300];
 

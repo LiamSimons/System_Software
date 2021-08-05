@@ -3,12 +3,14 @@
 FLAGS = -std=c11 -Werror -lm $(shell pkg-config --cflags --libs check)
 
 test1:
+	mkdir ./build -p
 	gcc -Wall main.c sensor_db.c -lsqlite3 -o ./build/test1 $(FLAGS)
 	./build/test1
 
 test2:
-	gcc -Wall main.c sensor_db.c sqlite3.c -pthread -ldl
-
+	mkdir ./build -p
+	gcc -Wall main.c sensor_db.c sqlite3.c -pthread -ldl -o ./build/test2 $(FLAGS)
+	./build/test2
 
 # the files for ex2 will be ziped and are then ready to
 # be submitted to labtools.groept.be
