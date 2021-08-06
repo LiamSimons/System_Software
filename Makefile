@@ -7,7 +7,7 @@ test1:
 	gcc -Wall main.c sensor_db.c -lsqlite3 -o ./build/test1 $(FLAGS)
 	./build/test1
 
-test2:
+test2:	# to do this first download sqlite source code 'amalgamation'
 	mkdir ./build -p
 	gcc -Wall main.c sensor_db.c sqlite3.c -pthread -ldl -o ./build/test2 $(FLAGS)
 	./build/test2
