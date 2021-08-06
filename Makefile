@@ -5,13 +5,16 @@
 zip:
 	zip lab7_ex2.zip connmgr.c connmgr.h config.h lib/dplist.c lib/dplist.h lib/tcpsock.c lib/tcpsock.h
 
+testserver:
+	gcc test_server.c -ldplist -L./lib -Wl,-rpath=./lib lib/tcpsock.c -o server -Wall -Werror -DTIMEOUT=5
+
 server:
-	gcc main.c connmgr.c -ldplist -L./lib -Wl,-rpath=./lib lib/tcpsock.c -o server -Wall -Werror -DTIMEOUT=5
+	gcc main.c connmgr.c -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o server -Wall -Werror -DTIMEOUT=5
 
 client:
-	gcc sensor_node.c lib/tcpsock.c -o client -Wall -Werror
+	gcc sensor_node.c -ltcpsock -L./lib -Wl,-rpath=./lib -o client -Wall -Werror
 
-lin:
+lib:
 	gcc -fPIC -c ./lib/tcpsock.c
 	mv ./tcpsock.o ./lib/tcpsock.o
 	gcc -shared -o ./lib/libtcpsock.so ./lib/tcpsock.o
