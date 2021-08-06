@@ -15,6 +15,9 @@ int element_compare(void* x, void* y){
 }
 
 dplist_t* list;
+// POLL //
+int nfds, num_open_fds;
+struct pollfd *pfds;
 
 // CONNMGR FUNCTIONALITY //
 void connmgr_listen(int port_number){
@@ -23,6 +26,8 @@ void connmgr_listen(int port_number){
 		/**
 		*	Now test the poll function
 		*/
+		
+
 	//
 	printf("CONN LISTEN\n");
 }
