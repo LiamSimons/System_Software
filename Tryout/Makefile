@@ -24,3 +24,11 @@ client:
 main:
 	gcc main.c connmgr.c -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o main -Wall -Werror -DTIMEOUT=5
 	./main
+
+debug-main:
+	gcc main.c connmgr.c -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o main -Wall -Werror -DTIMEOUT=5 -DDEBUG
+	./main
+
+valgrind-main:
+	gcc main.c connmgr.c -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o main -Wall -Werror -DTIMEOUT=5 -DDEBUG -DLOADING_TIME=0
+	valgrind --leak-check=full --show-leak-kinds=all ./main
