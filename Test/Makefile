@@ -32,11 +32,3 @@ debug-main:
 valgrind-main:
 	gcc main.c connmgr.c -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o main -Wall -Werror -DTIMEOUT=5 -DDEBUG -DLOADING_TIME=0
 	valgrind --leak-check=full --show-leak-kinds=all ./main
-
-connmgr1:
-	gcc main.c connmgr_1.c -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o main -Wall -Werror -DTIMEOUT=5
-	./main
-
-valgrind-connmgr1:
-	gcc main.c connmgr.c -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o main -Wall -Werror -DTIMEOUT=5 -DDEBUG -DLOADING_TIME=0
-	valgrind --leak-check=full --show-leak-kinds=all ./main
