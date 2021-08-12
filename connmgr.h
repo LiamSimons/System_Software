@@ -11,6 +11,7 @@
 #include "lib/tcpsock.h"
 #include "lib/dplist.h"
 #include "config.h"
+#include "sbuffer.h"
 
 #ifndef TIMEOUT
 	#error TIMEOUT must be specified [in seconds]
@@ -26,7 +27,7 @@
 It starts listening on the given port and when a sensor node connects it writes the data to a sensor_data_recv file.
 This file must have the same format as the sensor_data file in assignment 6 and 7.
 */
-void connmgr_listen(int port_number);
+void connmgr_listen(int port_number, sbuffer_t* sbuffer, FILE* log_fifo);
 
 
 /*This method should be called to clean up the connmgr, and to free all used memory.

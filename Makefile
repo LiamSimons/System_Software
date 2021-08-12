@@ -12,10 +12,19 @@ lib:
 
 # --- Main --- #
 main:
+	mkdir ./build -p
+	gcc main.c connmgr.c datamgr.c sensor_db.c sbuffer.c -lsqlite3 -lpthread -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o ./build/main -Wall -Werror -DTIMEOUT=5 -DSET_MIN_TEMP=-10 -DSET_MAX_TEMP=50
+	./build/main 1234
 
 debug-main:
+	mkdir ./build -p
+	gcc main.c connmgr.c datamgr.c sensor_db.c sbuffer.c -lsqlite3 -lpthread -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o ./build/main -Wall -Werror -DTIMEOUT=5 -DSET_MIN_TEMP=-10 -DSET_MAX_TEMP=50 -DDEBUG
+	./build/main 1234
 
 valgrind-main:
+	mkdir ./build -p
+	gcc main.c connmgr.c datamgr.c sensor_db.c sbuffer.c -lsqlite3 -lpthread -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o ./build/main -Wall -Werror -DTIMEOUT=5 -DSET_MIN_TEMP=-10 -DSET_MAX_TEMP=50 -DDEBUG
+	valgrind --leak-check=full --show-leak-kinds=all ./build/main
 
 # --- Tests --- #
 

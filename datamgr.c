@@ -21,11 +21,11 @@ typedef struct {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CALLBACK FUNCTIONS - for dplist
 
-void* element_copy(void * element);
-void element_free(void ** element);
-int element_compare(void * x, void * y);
+void* datamgr_element_copy(void * element);
+void datamgr_element_free(void ** element);
+int datamgr_element_compare(void * x, void * y);
 
-void * element_copy(void * element){
+void * datamgr_element_copy(void * element){
 	sensor_t * sensor = (sensor_t *)element;
 	sensor_t * copy_sensor = malloc(sizeof(sensor_t));
 
@@ -39,12 +39,12 @@ void * element_copy(void * element){
 	}
 	return copy_sensor;
 }
-void element_free(void ** element) {
+void datamgr_element_free(void ** element) {
 	sensor_t * dummy = *element;
 	free(dummy);
 }
 
-int element_compare(void * x, void * y){
+int datamgr_element_compare(void * x, void * y){
 	sensor_t * dummy = (sensor_t*)y;
 	if(*(uint16_t *)x == dummy->sensor_id){
 		return 0;
@@ -61,7 +61,7 @@ int element_compare(void * x, void * y){
 dplist_t *list;
 
 void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
-	list  = dpl_create(element_copy, element_free, element_compare);
+	list  = dpl_create(datamgr_element_copy, datamgr_element_free, datamgr_element_compare);
 
 	//Inserting sensors
 	uint16_t temp_room_id;
@@ -76,8 +76,6 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
 		}
 		list = dpl_insert_at_index(list, data, dpl_size(list), false);
 	}
-		printf("In data parse\n");
-
 
 	//Inserting sensor data
 	double temp_temperature;

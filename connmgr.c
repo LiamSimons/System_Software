@@ -27,19 +27,19 @@ static int update_poll_array(pollfd_t** poll_array, int nr_connections);
 static int receive_data(sensor_data_t* data_pointer, tcpsock_t* sensor_socket);
 
 // Callback functions
-void* element_copy(void* element){
+void* connmgr_element_copy(void* element){
 	list_element_t* copy = (list_element_t*)malloc(sizeof(list_element_t));
 	copy->socket = ((list_element_t*)element)->socket;
 	copy->id = ((list_element_t*)element)->id;
 	copy->last_ts = ((list_element_t*)element)->last_ts;	
 	return copy;
 }
-void element_free(void** element){
+void connmgr_element_free(void** element){
 	if(*element == NULL) return;
 	free(*element);
 	*element = NULL;
 }
-int element_compare(void* x, void*y){
+int connmgr_element_compare(void* x, void*y){
 	return(	(((list_element_t*)x)->id < ((list_element_t*)y)->id) ? -1 :
 			(((list_element_t*)x)->id == ((list_element_t*)y)->id) ? 0 :
 			1);
@@ -48,17 +48,21 @@ int element_compare(void* x, void*y){
 
 //------------------------------------------------------------------------------------//
 // Connmgr implementation
-void connmgr_listen(int port_number){
-	connections = dpl_create(element_copy, element_free, element_compare);
+void connmgr_listen(int port_number, sbuffer_t* sbuffer, FILE* log_fifo){
+	connections = dpl_create(connmgr_element_copy, connmgr_element_free, connmgr_element_compare);
 	pollfd_t* poll_array = (pollfd_t*)malloc(sizeof(pollfd_t));
 
 	tcpsock_t* server, *sensor;
 	sensor_data_t data;
 
 	// Server
-	if(tcp_passive_open(&server, port_number) != TCP_NO_ERROR) exit(EXIT_FAILURE);
+	if(tcp_passive_open(&server, port_number) != TCP_NO_ERROR){
+		printf("Failure: can't open server socket.\n");
+		printf("\tPort number = %d\n", port_number);
+		exit(EXIT_FAILURE);
+	} 
 	if(tcp_get_sd(server, &(poll_array->fd)) != TCP_NO_ERROR){
-		printf("Failure: server sd cannot be retrieved");
+		printf("Failure: server sd cannot be retrieved\n");
 	}
 	poll_array->fd = POLLIN;
 	list_element_t* server_element = (list_element_t*)malloc(sizeof(list_element_t));
@@ -71,6 +75,7 @@ void connmgr_listen(int port_number){
 	DEBUG_PRINT("\tid = %d\n", server_element->id);
 	free(server_element);
 	printf("< Server started: [timeout after %d seconds]\n", TIMEOUT);
+	// write to log: server started
 
 	// Main loop
 	do{
@@ -88,6 +93,7 @@ void connmgr_listen(int port_number){
 			free(poll_array);
 			connmgr_free();
 			printf("Memory cleared.\n");
+			// write to log: server shutdown
 			break;
 		}
 		if(poll_array[0].revents == POLLIN){
@@ -104,8 +110,9 @@ void connmgr_listen(int port_number){
 		for(int connection = 1; connection < dpl_size(connections); connection++){
 			list_element_t* sensor = dpl_get_element_at_index(connections, connection);
 			if((sensor->last_ts + TIMEOUT) < time(NULL)){
-				printf("Sensor %d exceeded timeout limit.", sensor->id);
+				printf("Sensor %d exceeded timeout limit.\n", sensor->id);
 				tcp_close(&(sensor->socket));
+				// write to fifo: sensor %d disconnected - timeout
 				connections = dpl_remove_at_index(connections, connection, true);
 			}
 			if(poll_array[connection].revents == POLLIN){
@@ -173,6 +180,7 @@ static int receive_data(sensor_data_t* dummy_data, tcpsock_t* sensor){
 		FILE *fp = fopen("sensor_data_recv", "a");
 		fprintf(fp, "%d %f %ld\n", dummy_data->id, dummy_data->value, dummy_data->ts);
 		fclose(fp);
+		// write to sbuffer
 	}
 	return result;
 }
