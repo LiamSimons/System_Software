@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include "config.h"
 #include <sqlite3.h>
+#include "sbuffer.h"	// ADDED
+#include "main.h"		// ADDED
 
 // stringify preprocessor directives using 2-level preprocessor magic
 // this avoids using directives like -DDB_NAME=\"some_db_name\"
@@ -24,6 +26,7 @@
 #endif
 
 #define DBCONN sqlite3
+#define MAX_ATTEMPTS	3
 
 typedef int (*callback_t)(void *, int, char **, char **);
 
@@ -33,7 +36,7 @@ typedef int (*callback_t)(void *, int, char **, char **);
  * \param clear_up_flag if the table existed, clear up the existing data when clear_up_flag is set to 1
  * \return the connection for success, NULL if an error occurs
  */
-DBCONN *init_connection(char clear_up_flag);
+DBCONN *init_connection(char clear_up_flag, FILE* log_fifo);
 
 /**
  * Disconnect from the database server
@@ -107,5 +110,8 @@ int find_sensor_by_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f);
  * \return zero for success, and non-zero if an error occurs
  */
 int find_sensor_after_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f);
+
+// FINAL ASSIGNMENT
+int insert_sensor_from_buffer(DBCONN *conn, sbuffer_t* sbuffer, int reader_thread, FILE* log_fifo);
 
 #endif /* _SENSOR_DB_H_ */

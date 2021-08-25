@@ -16,7 +16,7 @@
 // https://www.geeksforgeeks.org/mutex-lock-for-linux-thread-synchronization/#:~:text=int%20pthread_mutex_lock(pthread_mutex_t%20*mutex),object%2C%20which%20identifies%20a%20mutex.&text=The%20thread%20that%20has%20locked,the%20lock%20may%20be%20different.
 pthread_mutex_t lock_fifo = PTHREAD_MUTEX_INITIALIZER;
 sbuffer_t* sbuffer;
-int log_id = 0;		// remove this with a getter
+int log_id = 0;		// remove this with a getter maybe
 
 struct connmgr_thread_arg{
 	FILE* log_fifo;
@@ -40,10 +40,10 @@ int main(int argc, char *argv[]){
 			connmgr_thread_arg_t* conn_argument = (connmgr_thread_arg_t*)malloc(sizeof(connmgr_thread_arg_t));
 			conn_argument->log_fifo = log_fifo;
 			conn_argument->port = atoi(argv[1]);
-			DEBUG_PRINT("port number inserted in struct = %d\n", atoi(argv[1]));
+			DEBUG_PRINT("main: port number inserted in struct = %d\n", atoi(argv[1]));
 
 			// https://man7.org/linux/man-pages/man3/pthread_create.3.html
-			DEBUG_PRINT("Creating threads\n");
+			DEBUG_PRINT("main: Creating threads\n");
 			pthread_t writer_connmgr, reader_datamgr, reader_sensor_db;
 			pthread_create(&writer_connmgr, NULL, &connmgr, conn_argument);	//NULL -> default attributes & args -> single argument given to the function
 			pthread_create(&reader_datamgr, NULL, &datamgr, log_fifo);
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]){
 			// if connmgr stops first: SBUFFER_FINISHED -> so the others will stop as well
 			// if sensor_db stops first:	connmgr should be cancelled -> when db fails
 			// datamgr can only stop when SBUFFER_FINISHED
-			DEBUG_PRINT("Waiting for threads to terminate with pthread_join()\n");
+			DEBUG_PRINT("main: Waiting for threads to terminate with pthread_join()\n");
 			void *connmgr_exit_status, *datamgr_exit_status, *sensor_db_exit_status;
 			pthread_join(reader_sensor_db, &sensor_db_exit_status);
 				pthread_cancel(writer_connmgr); // gives memory leak i can't solve (yet)
@@ -63,8 +63,9 @@ int main(int argc, char *argv[]){
 			printf("< All threads joined.\n");
 
 		free(conn_argument);
+		if(sbuffer_size(sbuffer) != 0) printf("Error: sbuffer wasn't empty on finish. Size = %d\n", sbuffer_size(sbuffer));
 		sbuffer_free(&sbuffer);
-		if(remove_fifo(log_fifo) != 0) printf("Error: logFifo doesn't exist anymore.");
+		if(remove_fifo(log_fifo) != 0) printf("Error: logFifo doesn't exist anymore.\n");
 		waitpid(pid, NULL, 0);
 		printf("< End of main process.\n");
 		exit(EXIT_SUCCESS);
@@ -75,7 +76,7 @@ int main(int argc, char *argv[]){
 
 // Other functions
 int create_fifo(){
-	DEBUG_PRINT("CREATE_FIFO CALLED\n");
+	DEBUG_PRINT("main: CREATE_FIFO CALLED\n");
 	// Implementation: 	https://pubs.opengroup.org/onlinepubs/009696799/functions/mkfifo.html
 	// Premissions:		https://pubs.opengroup.org/onlinepubs/7908799/xsh/sysstat.h.html
 	// Check if logFifo already exists
@@ -87,7 +88,7 @@ int create_fifo(){
 	}
 }
 int write_fifo(FILE* log_fifo, time_t ts, char * message){	// Req 8. - <sequence number> <timestamp> <log-event info message>
-	DEBUG_PRINT("WRITE_FIFO CALLED\n");
+	DEBUG_PRINT("main: WRITE_FIFO CALLED\n");
 	// https://www.tutorialspoint.com/c_standard_library/c_function_fputs.htm
 	char* fifo_input;
 	asprintf(&fifo_input, "%d %ld %s\n", log_id, ts, message);
@@ -95,13 +96,13 @@ int write_fifo(FILE* log_fifo, time_t ts, char * message){	// Req 8. - <sequence
 		if(fputs(fifo_input, log_fifo) == EOF) exit(EXIT_FAILURE);
 		fflush(log_fifo);
 	pthread_mutex_unlock(&lock_fifo);
-	printf("< Fifo message input: %s\n", fifo_input);
+	printf("< Fifo message input: %s", fifo_input);
 	log_id++;
 	free(fifo_input);
 	return 0;
 }	
 int remove_fifo(FILE* log_fifo){
-	DEBUG_PRINT("REMOVE_FIFO CALLED\n");
+	DEBUG_PRINT("main: REMOVE_FIFO CALLED\n");
 	fclose(log_fifo);
 	//if(access("logFifo", F_OK) == 0){
 		remove("logFifo");
@@ -110,7 +111,7 @@ int remove_fifo(FILE* log_fifo){
 	//else return -1;
 }
 void read_fifo(FILE* log_fifo, FILE* gateway_log){
-	DEBUG_PRINT("READ_FIFO CALLED\n");
+	DEBUG_PRINT("main: READ_FIFO CALLED\n");
 	// https://www.tutorialspoint.com/c_standard_library/c_function_fgets.htm
 	char* fifo_output_result;
 	char fifo_output[MAX_FIFO_CHARACTERS];
@@ -118,7 +119,7 @@ void read_fifo(FILE* log_fifo, FILE* gateway_log){
 		pthread_mutex_lock(&lock_fifo);
 			fifo_output_result = fgets(fifo_output, MAX_FIFO_CHARACTERS, log_fifo);
 			if(fifo_output_result != NULL){
-				printf("< Fifo message output: %s\n", fifo_output);
+				printf("< Fifo message output: %s", fifo_output);
 				fprintf(gateway_log, "%s", fifo_output);
 			}
 		pthread_mutex_unlock(&lock_fifo);
@@ -126,7 +127,7 @@ void read_fifo(FILE* log_fifo, FILE* gateway_log){
 }
 
 void run_child(){
-	DEBUG_PRINT("RUN_CHILD CALLED\n");
+	DEBUG_PRINT("main: RUN_CHILD CALLED\n");
 	// Req 1. - log process
 	pid_t child_pid, parent_pid;
 	child_pid = getpid();
@@ -150,48 +151,50 @@ void* connmgr(void* conn_argument){
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	connmgr_thread_arg_t* connmgr_args = conn_argument;
 	connmgr_listen(connmgr_args->port, sbuffer, connmgr_args->log_fifo);
+	DEBUG_PRINT("main: connmgr thread: finished connmgr listen, now inserting SBUFFER_STOP\n");
+	sbuffer_insert(sbuffer, NULL, SBUFFER_STOP);
+	sbuffer_insert(sbuffer, NULL, SBUFFER_STOP); // this one triggers pthread_cond_wait() of slower thread
 	printf("< Connmgr thread finished.\n");
 	pthread_exit(NULL);
 }
-void* datamgr(){
+void* datamgr(void* log_fifo){
 	FILE *fp = fopen("./room_sensor.map","r");
 	if(fp == NULL){
 		printf("ERROR: opening room sensor map, file probably missing.\n\t> Run './file_creator' to generate these files.");
 		exit(EXIT_FAILURE);
 	}
-	// <TEMP - replace with buffer
-	FILE *fpdata = fopen("./sensor_data","r");
-	if(fpdata == NULL){
-		printf("ERROR: opening sensor data, file probably missing.\n\t> Run './file_creator' to generate these files.");
-		exit(EXIT_FAILURE);
-	}
 	// TEMP/>
-	datamgr_parse_sensor_files(fp, fpdata);
+	datamgr_parse_sbuffer_data(fp, sbuffer, READER_DATAMGR, log_fifo);
 
 	datamgr_free();
 	fclose(fp);
-	fclose(fpdata);
 	printf("< Datamgr thread finished\n");
 	pthread_exit(NULL);
 }
-void* sensor_db(){
+void* sensor_db(void* log_fifo){
 	sqlite3* db;
-	FILE* sensor_data = fopen("sensor_data_text", "r");
-	int tries;
+	int attempts = 0;	// Req 6. - 3 attempts to connect to SQL server
 	while(1){
+		if(attempts == 2){
+			printf("< sensor_db thread: connection to database failed.\n");
+			sbuffer_insert(sbuffer, NULL, SBUFFER_STOP);
+			break;
+		}
 		if(db == NULL){
-			tries++; //REVIEW TRIES
-			db = init_connection(1);
+			attempts++; //REVIEW TRIES
+			db = init_connection(1, log_fifo);	// clear_up_flag = 1
 		}
 		else{
-			if(insert_sensor_from_file(db, sensor_data) == 0){
+			if(insert_sensor_from_buffer(db, sbuffer, READER_SENSOR_DB, log_fifo) == 0){
 				// change this with insert_sensor_from_buffer
 				disconnect(db);
 				printf("< Sqlite3 database disconnected.\n");
-				pthread_exit(NULL);
+				break;
 			}
 			else{
 				// insert EOB in sbuffer because can't connect db
+				sbuffer_insert(sbuffer, NULL, SBUFFER_STOP);
+				break;
 			}
 		}
 	}

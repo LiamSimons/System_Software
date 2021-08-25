@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "config.h"
+#include "sbuffer.h"
+#include "main.h"
 
 #ifndef RUN_AVG_LENGTH
 #define RUN_AVG_LENGTH 5
@@ -76,4 +78,8 @@ time_t datamgr_get_last_modified(sensor_id_t sensor_id);
 int datamgr_get_total_sensors();
 
 void print_list();
+
+// ADDED: function like datamgr_parse_sensor_files() but with buffer values 
+int datamgr_parse_sbuffer_data(FILE* fp_sensor_map, sbuffer_t* sbuffer, int reader_thread, FILE* log_fifo);
+
 #endif  //DATAMGR_H_

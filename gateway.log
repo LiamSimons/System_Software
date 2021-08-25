@@ -1,1 +1,6 @@
-0 1628763579 MAIN PROCESS STARTED
+0 1628800462 MAIN PROCESS STARTED
+1 1628800462 Sensor_db: Connection to SQL server established.
+2 1628800462 Sensor_db: New table <SensorData> created.
+3 1628800464 Connmgr: A sensor node with id = 15 has opened a new connection.
+4 1628800475 Connmgr: A sensor node with id = 15 has closed the connection.
+5 1628800480 Connmgr: Server exceeded timeout limit, shutting down.

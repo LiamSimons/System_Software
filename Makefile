@@ -24,7 +24,7 @@ debug-main:
 valgrind-main:
 	mkdir ./build -p
 	gcc main.c connmgr.c datamgr.c sensor_db.c sbuffer.c -lsqlite3 -lpthread -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o ./build/main -Wall -Werror -DTIMEOUT=5 -DSET_MIN_TEMP=-10 -DSET_MAX_TEMP=50 -DDEBUG
-	valgrind --leak-check=full --show-leak-kinds=all ./build/main
+	valgrind --leak-check=full --show-leak-kinds=all ./build/main 1234
 
 # --- Tests --- #
 
@@ -47,3 +47,5 @@ connmgr-test:
 	gcc ./Tests/main_files/connmgr_main.c connmgr.c -ldplist -ltcpsock -L./lib -Wl,-rpath=./lib -o build/connmgr_test -Wall -Werror -DTIMEOUT=5
 	./build/connmgr_test
 
+zip:
+	zip -o final_assignment.zip code_review_checklist.ods Makefile config.h main.c main.h connmgr.c connmgr.h datamgr.c datamgr.h sbuffer.c sbuffer.h sensor_db.c sensor_db.h lib/dplist.c lib/dplist.h lib/tcpsock.c lib/tcpsock.h

@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "connmgr.h"
 
 #ifdef DEBUG
@@ -24,7 +25,7 @@ typedef struct list_element{
 static void server_print(char to_print[]);	// print template while server is running
 static void loading_dots(int seconds);		// just for fun
 static int update_poll_array(pollfd_t** poll_array, int nr_connections);
-static int receive_data(sensor_data_t* data_pointer, tcpsock_t* sensor_socket);
+static int receive_data(sensor_data_t* data_pointer, tcpsock_t* sensor_socket, sbuffer_t* sbuffer);
 
 // Callback functions
 void* connmgr_element_copy(void* element){
@@ -54,6 +55,7 @@ void connmgr_listen(int port_number, sbuffer_t* sbuffer, FILE* log_fifo){
 
 	tcpsock_t* server, *sensor;
 	sensor_data_t data;
+	char* log;	// ADDED: log to write to fifo
 
 	// Server
 	if(tcp_passive_open(&server, port_number) != TCP_NO_ERROR){
@@ -80,20 +82,24 @@ void connmgr_listen(int port_number, sbuffer_t* sbuffer, FILE* log_fifo){
 	// Main loop
 	do{
 		if(update_poll_array(&poll_array, dpl_size(connections)) != 0) exit(EXIT_FAILURE);
-		DEBUG_PRINT("Poll array updated.\n");
+		DEBUG_PRINT("connmgr: Poll array updated.\n");
 		int poll_value = poll(poll_array, dpl_size(connections), TIMEOUT*1000);
-		DEBUG_PRINT("Poll completed.\n");
+		DEBUG_PRINT("connmgr: Poll completed.\n");
 
 		if(poll_value == -1) exit(EXIT_FAILURE);
 		if(poll_value == 0 && dpl_size(connections) == 1){
 			server_print("Server exceeded timeout limit.");
+			asprintf(&log, "Connmgr: Server exceeded timeout limit, shutting down.");
+			write_fifo(log_fifo, time(NULL), log);
 			server_print("Freeing memory");
 			loading_dots(0);	// This is for fun: replace 0 with LOADING_TIME macro
 			tcp_close(&server);
 			free(poll_array);
+			free(log);
 			connmgr_free();
 			printf("Memory cleared.\n");
 			// write to log: server shutdown
+			//sbuffer_insert(sbuffer, NULL, SBUFFER_STOP); ALREADY DONE IN MAIN
 			break;
 		}
 		if(poll_array[0].revents == POLLIN){
@@ -117,10 +123,18 @@ void connmgr_listen(int port_number, sbuffer_t* sbuffer, FILE* log_fifo){
 			}
 			if(poll_array[connection].revents == POLLIN){
 				sensor->last_ts = time(NULL);
-				int result = receive_data(&data, sensor->socket);
-				if(sensor->id == 0) sensor->id = data.id;
+				int result = receive_data(&data, sensor->socket, sbuffer);
+				if(sensor->id == 0) {
+					sensor->id = data.id;
+					asprintf(&log, "Connmgr: A sensor node with id = %d has opened a new connection.", sensor->id);
+					write_fifo(log_fifo, time(NULL), log);
+					free(log);
+				}
 				if(result == TCP_CONNECTION_CLOSED){
 					server_print("Sensor closed connection.");
+					asprintf(&log, "Connmgr: A sensor node with id = %d has closed the connection.", sensor->id);
+					write_fifo(log_fifo, time(NULL), log);
+					free(log);
 					tcp_close(&(sensor->socket));
 					connections = dpl_remove_at_index(connections, connection, true);
 				}
@@ -128,7 +142,7 @@ void connmgr_listen(int port_number, sbuffer_t* sbuffer, FILE* log_fifo){
 		}
 		
 	}while(1);
-	DEBUG_PRINT("While loop finished\n");
+	DEBUG_PRINT("connmgr: While loop finished\n");
 	printf("< Server closed.\n");
 }
 void connmgr_free(){
@@ -159,7 +173,7 @@ static int update_poll_array(pollfd_t** poll_array, int nr_connections){
 	}
 	return 0;
 }
-static int receive_data(sensor_data_t* dummy_data, tcpsock_t* sensor){
+static int receive_data(sensor_data_t* dummy_data, tcpsock_t* sensor, sbuffer_t* sbuffer){
 	if(dummy_data == NULL || sensor == NULL) {
 		printf("< Failure: receive data got NULL arguments.\n");
 		return -1;
@@ -181,6 +195,7 @@ static int receive_data(sensor_data_t* dummy_data, tcpsock_t* sensor){
 		fprintf(fp, "%d %f %ld\n", dummy_data->id, dummy_data->value, dummy_data->ts);
 		fclose(fp);
 		// write to sbuffer
+		sbuffer_insert(sbuffer, dummy_data, SBUFFER_GO);
 	}
 	return result;
 }

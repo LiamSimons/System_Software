@@ -12,6 +12,7 @@
 #include "lib/dplist.h"
 #include "config.h"
 #include "sbuffer.h"
+#include "main.h"
 
 #ifndef TIMEOUT
 	#error TIMEOUT must be specified [in seconds]

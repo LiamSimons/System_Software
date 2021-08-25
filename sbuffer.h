@@ -16,6 +16,9 @@
 #define SBUFFER_STOP		3	// ADDED: writer inserts this into buffer to signal it to stop
 #define SBUFFER_GO			4	// ADDED: writer inserts this when inserting normal data into buffer
 
+#define READER_DATAMGR		5	// ADDED: read parameter to distinguish which thread is reading from the buffer
+#define READER_SENSOR_DB	6	// ADDED: read parameter to distinguish which thread is reading from the buffer
+
 typedef struct sbuffer sbuffer_t;
 
 /**
@@ -48,5 +51,12 @@ int sbuffer_remove(sbuffer_t *buffer/*, sensor_data_t *data*/);
  * \return SBUFFER_SUCCESS on success and SBUFFER_FAILURE if an error occured
 */
 int sbuffer_insert(sbuffer_t *buffer, sensor_data_t *data, int stop_and_go);
+
+// ADDED: function to more easily read the buffer from different threads
+//		  some handling and differentiation between threads 
+int sbuffer_read(sbuffer_t *buffer, sensor_data_t* data, int reader_thread);
+
+// ADDED: this is to check if the buffer is empty
+int sbuffer_size(sbuffer_t *buffer);
 
 #endif  //_SBUFFER_H_
